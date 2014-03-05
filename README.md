@@ -1,12 +1,15 @@
-# wechat
+# wechat Go 开发框架
 
-## How to install?
+
+##  安装
 	
+框架主要依赖包：
+
 	go get github.com/astaxie/beego/logs
 	go get github.com/astaxie/beego/config
 	go get github.com/liujianping/wechat
 
-## How to use it?
+##  使用
 
 ### 1) you need import it
 

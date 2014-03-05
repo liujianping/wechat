@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"net/http"
 	"io/ioutil"
+	"time"
 	"github.com/liujianping/wechat/entry"
 )
 
@@ -76,6 +77,14 @@ func (cb *Callback) Execute(wr http.ResponseWriter, req *http.Request) error{
 	msgType := request.MsgType
 	ch := make(chan interface{})
 	defer close(ch)
+
+	timeout := make(chan bool, 1)
+	defer close(timeout)
+
+	go func() {
+		time.Sleep(3e9) // 等待3秒钟
+		timeout <- true 
+		}()
 	
 	if "event" == msgType {
 		//! event
@@ -144,8 +153,15 @@ func (cb *Callback) Execute(wr http.ResponseWriter, req *http.Request) error{
 		}
 	}
 
-	response,_ := xml.Marshal(<-ch)
-	wr.Write(response)
+	select{
+	case <-ch:
+		response,_ := xml.Marshal(<-ch)
+		wr.Write(response)	
+	case <-timeout:
+		Warn("timeout")
+		wr.Write([]byte(""))
+	}
+	
 	return nil
 }
 
