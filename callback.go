@@ -12,12 +12,12 @@ import (
 type CallbackInterface interface {
 	Initialize(app *WeChatApp, api	*ApiClient)
 	Execute(wr http.ResponseWriter, req *http.Request) error
-	MsgText(txt entry.TextRequest, back chan interface{})
-	MsgImage(img entry.ImageRequest, back chan interface{})
-	MsgVoice(voice entry.VoiceRequest, back chan interface{})
-	MsgVideo(video entry.VideoRequest, back chan interface{})
-	MsgLink(link entry.LinkRequest, back chan interface{})
-	Location(location entry.LocationRequest, back chan interface{})
+	MsgText(txt *entry.TextRequest, back chan interface{})
+	MsgImage(img *entry.ImageRequest, back chan interface{})
+	MsgVoice(voice *entry.VoiceRequest, back chan interface{})
+	MsgVideo(video *entry.VideoRequest, back chan interface{})
+	MsgLink(link *entry.LinkRequest, back chan interface{})
+	Location(location *entry.LocationRequest, back chan interface{})
 	EventSubscribe(oid string, back chan interface{})
 	EventUnsubscribe(oid string, back chan interface{})
 	EventMenu(oid string, key string, back chan interface{})
