@@ -178,13 +178,15 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 	defer close(timeout)
 
 	go func(c chan bool) {
-		time.Sleep(3e9) // 等待3秒钟
-		//! check timeout not close
-		if _, ok := <-c; ok {
-			c <- true
-		}
-	}(timeout)
+		defer func(){
+	    	if x := recover(); x != nil {
+				Debug("wechat: ", x)
+			}
+	    }()
 
+		time.Sleep(3e9) // 等待3秒钟
+		c <- true
+	}(timeout)
 	
 	if "event" == msgType {
 		//! event
