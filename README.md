@@ -1,5 +1,6 @@
 # wechat Go 开发框架
 
+[![GoDoc](http://godoc.org/github.com/liujianping/wechat?status.png)](http://godoc.org/github.com/liujianping/wechat)
 
 ##  安装
 	
@@ -64,10 +65,48 @@
 		"github.com/liujianping/wechat/entry"
 	)
 
+## create menu for the app
+
+菜单的创建
+
+	import "github.com/liujianping/wechat/entry"
+
+	menu := entry.NewMenu()
+
+	btn1 := entry.NewViewButton("新浪","http://sina.com")
+	btn2 := entry.NewClickButton("点击","EVENT_MENU_CLICK")
+	btn3 := entry.NewButton("更多")
+	btn3.Append(entry.NewViewButton("腾讯","http://qq.com"))
+	btn3.Append(entry.NewViewButton("百度","http://baidu.com"))
+	btn3.Append(entry.NewViewButton("点评","http://dianping.com"))
+	menu.Add(btn1)
+	menu.Add(btn2)
+	menu.Add(btn3)
+
+	client := api.NewApiClient(cs_token, cs_appid, cs_appsecret)
+	client.SetCache("redisx",`{"conn":":6379"}`)
+	client.CreateMenu(menu)
+
+在WeChatAPP中添加菜单
+
+	menu := entry.NewMenu()
+
+	btn1 := entry.NewViewButton("新浪","http://sina.com")
+	btn2 := entry.NewClickButton("点击","EVENT_MENU_CLICK")
+	btn3 := entry.NewButton("更多")
+	btn3.Append(entry.NewViewButton("腾讯","http://qq.com"))
+	btn3.Append(entry.NewViewButton("百度","http://baidu.com"))
+	btn3.Append(entry.NewViewButton("点评","http://dianping.com"))
+	menu.Add(btn1)
+	menu.Add(btn2)
+	menu.Add(btn3)
+
+	app.SetMenu(menu)
+
 ## How to create a new custom wechat app use the package
 
 - subclass a custom callback from wechat.callback 
 - create a custome callback and set to the wechat app
 - run the wechat app
 
-具体用例参见 github.com/liujianping/wechatdemo
+具体用例参见 [wechatdemo](https://github.com/liujianping/wechatdemo)
