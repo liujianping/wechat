@@ -27,6 +27,8 @@ type CallbackInterface interface {
 	EventMenu(appoid string, oid string, key string, back chan interface{})
 }
 
+type Handle func (data []byte, back chan interface{})
+
 type WeChatApp struct{
 	AppHost 	string 
 	AppPort 	int
@@ -38,6 +40,7 @@ type WeChatApp struct{
 	menu	  	*entry.Menu
 	config 		config.ConfigContainer
 	cb 			CallbackInterface
+	handle 		Handle
 	api 	    *ApiClient
 	once		sync.Once
 }
@@ -93,6 +96,10 @@ func (app *WeChatApp) SetCallback(callback CallbackInterface) {
 	app.cb = callback	
 }
 
+func (app *WeChatApp) SetHandle(handle Handle) {
+	app.handle = handle
+}
+
 func (app *WeChatApp) Run() {
 	defer func(){
     	if x := recover(); x != nil {
@@ -114,8 +121,8 @@ func (app *WeChatApp) initialize() error{
 		return errors.New("wechat: app id or token or secret not setting!")
 	}
 
-	if app.cb == nil {
-		return errors.New("wechat: callback interface is nil, please set callback first")
+	if app.cb == nil && app.handle == nil {
+		return errors.New("wechat: handle & callback both unset")
 	}
 
 	app.api = NewApiClient(app.AppToken, app.AppId, app.AppSecret)
@@ -149,6 +156,9 @@ func (app *WeChatApp) uri(wr http.ResponseWriter, req *http.Request) {
 			wr.Write([]byte(""))
 		}
 	} else {
+		if app.handle != nil {
+
+		}
 		if err := app.execute(wr, req); err != nil {
 			Warn("wechat:", err)
 		} 		
@@ -162,15 +172,6 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 	}
 
 	Debug("wechat: data \n", string(data))
-
-	request := &entry.Request{}
-	err = xml.Unmarshal(data, request)
-	if err != nil {
-		return err
-	}
-
-	event := request.Event
-	msgType := request.MsgType
 	ch := make(chan interface{})
 	defer close(ch)
 
@@ -187,71 +188,86 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 		time.Sleep(3e9) // 等待3秒钟
 		c <- true
 	}(timeout)
-	
-	if "event" == msgType {
-		//! event
-		switch (event){
-		case "subscribe":
-			go app.cb.EventSubscribe(request.ToUserName, request.FromUserName, ch)
-		case "unsubscribe":
-			go app.cb.EventUnsubscribe(request.ToUserName, request.FromUserName, ch)
-		case "CLICK":
-			go app.cb.EventMenu(request.ToUserName, request.FromUserName, request.EventKey, ch)
-		case "LOCATION":
-			location := &entry.LocationRequest{}
-			err = xml.Unmarshal(data, location)
-			if err != nil {
-				return err
-			}
-			go app.cb.Location(location, ch)
-		default:
-			return errors.New("unknown event ")
+
+	if app.handle != nil {
+		go app.handle(data, ch)
+	}
+
+	if app.cb != nil {
+		request := &entry.Request{}
+		err = xml.Unmarshal(data, request)
+		if err != nil {
+			return err
 		}
-	} else {
-		//! other msg
-		switch (msgType){
-		case "text":
-			text := &entry.TextRequest{}
-			err = xml.Unmarshal(data, text)
-			if err != nil {
-				return err
+
+		event := request.Event
+		msgType := request.MsgType
+		
+		if "event" == msgType {
+			//! event
+			switch (event){
+			case "subscribe":
+				go app.cb.EventSubscribe(request.ToUserName, request.FromUserName, ch)
+			case "unsubscribe":
+				go app.cb.EventUnsubscribe(request.ToUserName, request.FromUserName, ch)
+			case "CLICK":
+				go app.cb.EventMenu(request.ToUserName, request.FromUserName, request.EventKey, ch)
+			case "LOCATION":
+				location := &entry.LocationRequest{}
+				err = xml.Unmarshal(data, location)
+				if err != nil {
+					return err
+				}
+				go app.cb.Location(location, ch)
+			default:
+				return errors.New("unknown event ")
 			}
-			go app.cb.MsgText(text, ch)
-		case "image":
-			image := &entry.ImageRequest{}
-			err = xml.Unmarshal(data, image)
-			if err != nil {
-				return err
+		} else {
+			//! other msg
+			switch (msgType){
+			case "text":
+				text := &entry.TextRequest{}
+				err = xml.Unmarshal(data, text)
+				if err != nil {
+					return err
+				}
+				go app.cb.MsgText(text, ch)
+			case "image":
+				image := &entry.ImageRequest{}
+				err = xml.Unmarshal(data, image)
+				if err != nil {
+					return err
+				}
+				go app.cb.MsgImage(image, ch)			
+			case "voice":
+				voice := &entry.VoiceRequest{}
+				err = xml.Unmarshal(data, voice)
+				if err != nil {
+					return err
+				}
+				go app.cb.MsgVoice(voice, ch)			
+			case "video":
+				video := &entry.VideoRequest{}
+				err = xml.Unmarshal(data, video)
+				if err != nil {
+					return err
+				}
+				go app.cb.MsgVideo(video, ch)			
+			case "location":
+				location := &entry.LocationRequest{}
+				err = xml.Unmarshal(data, location)
+				if err != nil {
+					return err
+				}
+				go app.cb.Location(location, ch)			
+			case "link":
+				link := &entry.LinkRequest{}
+				err = xml.Unmarshal(data, link)
+				if err != nil {
+					return err
+				}
+				go app.cb.MsgLink(link, ch)
 			}
-			go app.cb.MsgImage(image, ch)			
-		case "voice":
-			voice := &entry.VoiceRequest{}
-			err = xml.Unmarshal(data, voice)
-			if err != nil {
-				return err
-			}
-			go app.cb.MsgVoice(voice, ch)			
-		case "video":
-			video := &entry.VideoRequest{}
-			err = xml.Unmarshal(data, video)
-			if err != nil {
-				return err
-			}
-			go app.cb.MsgVideo(video, ch)			
-		case "location":
-			location := &entry.LocationRequest{}
-			err = xml.Unmarshal(data, location)
-			if err != nil {
-				return err
-			}
-			go app.cb.Location(location, ch)			
-		case "link":
-			link := &entry.LinkRequest{}
-			err = xml.Unmarshal(data, link)
-			if err != nil {
-				return err
-			}
-			go app.cb.MsgLink(link, ch)
 		}
 	}
 
