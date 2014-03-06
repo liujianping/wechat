@@ -22,9 +22,9 @@ type CallbackInterface interface {
 	MsgVideo(video *entry.VideoRequest, back chan interface{})
 	MsgLink(link *entry.LinkRequest, back chan interface{})
 	Location(location *entry.LocationRequest, back chan interface{})
-	EventSubscribe(oid string, back chan interface{})
-	EventUnsubscribe(oid string, back chan interface{})
-	EventMenu(oid string, key string, back chan interface{})
+	EventSubscribe(appoid string, oid string, back chan interface{})
+	EventUnsubscribe(appoid string, oid string, back chan interface{})
+	EventMenu(appoid string, oid string, key string, back chan interface{})
 }
 
 type WeChatApp struct{
@@ -186,11 +186,11 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 		//! event
 		switch (event){
 		case "subscribe":
-			go app.cb.EventSubscribe(request.FromUserName, ch)
+			go app.cb.EventSubscribe(request.ToUserName, request.FromUserName, ch)
 		case "unsubscribe":
-			go app.cb.EventUnsubscribe(request.FromUserName, ch)
+			go app.cb.EventUnsubscribe(request.ToUserName, request.FromUserName, ch)
 		case "CLICK":
-			go app.cb.EventMenu(request.FromUserName, request.EventKey, ch)
+			go app.cb.EventMenu(request.ToUserName, request.FromUserName, request.EventKey, ch)
 		case "LOCATION":
 			location := &entry.LocationRequest{}
 			err = xml.Unmarshal(data, location)

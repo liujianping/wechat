@@ -31,13 +31,13 @@ func (cb *Callback) MsgLink(link *entry.LinkRequest, back chan interface{}){
 func (cb *Callback) Location(location *entry.LocationRequest, back chan interface{}){
 	
 }
-func (cb *Callback) EventSubscribe(oid string, back chan interface{}){
+func (cb *Callback) EventSubscribe(appoid string, oid string, back chan interface{}){
 
 }
-func (cb *Callback) EventUnsubscribe(oid string, back chan interface{}){
+func (cb *Callback) EventUnsubscribe(appoid string, oid string, back chan interface{}){
 
 }
-func (cb *Callback) EventMenu(oid string, key string, back chan interface{}){
+func (cb *Callback) EventMenu(appoid string, oid string, key string, back chan interface{}){
 	
 }
 
