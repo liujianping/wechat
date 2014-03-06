@@ -27,7 +27,7 @@ type CallbackInterface interface {
 	EventMenu(appoid string, oid string, key string, back chan interface{})
 }
 
-type Handle func (data []byte, back chan interface{})
+type Handle func (data []byte, back chan []byte)
 
 type WeChatApp struct{
 	AppHost 	string 
@@ -175,6 +175,9 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 	}
 
 	Debug("wechat: data \n", string(data))
+	raw := make(chan []byte)
+	defer close(raw)
+
 	ch := make(chan interface{})
 	defer close(ch)
 
@@ -193,7 +196,7 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 	}(timeout)
 
 	if app.handle != nil {
-		go app.handle(data, ch)
+		go app.handle(data, raw)
 	}
 
 	if app.cb != nil {
@@ -275,6 +278,9 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 	}
 
 	select{
+	case r := <-raw:
+		Debug("wechat: get response \n", string(r))
+		wr.Write(r)	
 	case b := <-ch:
 		response,_ := xml.Marshal(b)
 		Debug("wechat: get response \n", string(response))
