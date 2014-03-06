@@ -118,8 +118,8 @@ func (app *WeChatApp) initialize() error{
 		return errors.New("wechat: callback interface is nil, please set callback first")
 	}
 
-	app.cb.Initialize(app, app.api)
 	app.api = NewApiClient(app.AppToken, app.AppId, app.AppSecret)
+	app.cb.Initialize(app, app.api)
 
 	return nil
 }
