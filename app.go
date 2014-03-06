@@ -126,8 +126,11 @@ func (app *WeChatApp) initialize() error{
 	}
 
 	app.api = NewApiClient(app.AppToken, app.AppId, app.AppSecret)
-	app.cb.Initialize(app, app.api)
-
+	
+	if app.cb != nil  {
+		app.cb.Initialize(app, app.api)	
+	}
+	
 	return nil
 }
 
