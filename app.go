@@ -178,9 +178,12 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 	defer close(timeout)
 
 	go func() {
-		time.Sleep(3e9) // 等待3秒钟
-		timeout <- true 
-		}()
+		time.Sleep(4e9) // 等待3秒钟
+		//! check timeout not close
+		if _, ok := <-timeout; ok {
+			timeout <- true
+		}
+	}()
 	
 	if "event" == msgType {
 		//! event
@@ -250,8 +253,9 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 	}
 
 	select{
-	case <-ch:
-		response,_ := xml.Marshal(<-ch)
+	case b := <-ch:
+		response,_ := xml.Marshal(b)
+		Debug("wechat: get response \n", response)
 		wr.Write(response)	
 	case <-timeout:
 		Warn("wechat: timeout for null response")
