@@ -78,7 +78,7 @@ func checkJSError(js []byte) error{
     return nil
 }
 
-func (c *ApiClient) Check(signature, timestamp, nonce string) bool {
+func (c *ApiClient) Signature(signature, timestamp, nonce string) bool {
 
 	strs := sort.StringSlice{c.apptoken, timestamp, nonce}
 	sort.Strings(strs)

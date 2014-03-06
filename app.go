@@ -2,7 +2,6 @@ package wechat
 
 import (
 	"fmt"
-	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/config"
 	"net/http"
 	"os"
@@ -22,10 +21,9 @@ type WeChatApp struct{
 	AppPath		string
 	menu	  	*entry.Menu
 	config 		config.ConfigContainer
-	callback 	CallbackInterface
+	cb 			CallbackInterface
 	api 	    *ApiClient
 	once		sync.Once
-	*logs.BeeLogger
 }
 
 func NewWeChatApp() *WeChatApp {	
@@ -76,7 +74,7 @@ func (app *WeChatApp) SetMenu(menu *entry.Menu){
 }
 
 func (app *WeChatApp) SetCallback(callback CallbackInterface) {
-	app.callback = callback	
+	app.cb = callback	
 }
 
 func (app *WeChatApp) Run() {
@@ -100,18 +98,21 @@ func (app *WeChatApp) initialize() error{
 		return errors.New("wechat: app id or token or secret not setting!")
 	}
 
-	if app.callback == nil {
+	if app.cb == nil {
 		return errors.New("wechat: callback interface is nil, please set callback first")
 	}
 
+	app.cb.Initialize(app, app.api)
 	app.api = NewApiClient(app.AppToken, app.AppId, app.AppSecret)
-	app.callback.Initialize(app, app.api)
 
 	return nil
 }
 
 func (app *WeChatApp) buildMenu(){
 	if app.menu != nil {
+		if err := app.api.RemoveMenu(); err != nil {
+			panic(err)
+		}
 		if err := app.api.CreateMenu(app.menu); err != nil {
 			panic(err)
 		}
@@ -125,7 +126,7 @@ func (app *WeChatApp) uri(wr http.ResponseWriter, req *http.Request) {
 		nonce := req.FormValue("nonce")
 		echostr := req.FormValue("echostr")
 
-		if app.api.Check(signature, timestamp, nonce) == true {
+		if app.api.Signature(signature, timestamp, nonce) == true {
 			wr.Write([]byte(echostr))
 			app.once.Do(app.buildMenu)
 		} else {
@@ -139,5 +140,5 @@ func (app *WeChatApp) uri(wr http.ResponseWriter, req *http.Request) {
 }
 
 func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
-	return app.callback.Execute(wr,req)	
+	return app.cb.Execute(wr,req)	
 }
