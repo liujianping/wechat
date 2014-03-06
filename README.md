@@ -59,7 +59,22 @@
 
 ## about inner packages
 
+### cache package
+	
+	该cache主要是修改了 github.com/astaxie/beego/cache 中，redis类型缓存无超时功能的缺陷。
+	增加了 redisx 类型, 配置与redis类型相同，但是支持超时功能。
+
 ### entry package
+
+该entry包主要提供微信公众平台的的
+
+- 请求消息
+- 响应消息
+- 客服消息
+- 菜单
+- 订阅者
+
+几种类型数据的定义
 
 	import (
 		"github.com/liujianping/wechat/entry"
@@ -69,6 +84,7 @@
 
 菜单的创建
 
+	import "github.com/liujianping/wechat"
 	import "github.com/liujianping/wechat/entry"
 
 	menu := entry.NewMenu()
@@ -83,7 +99,7 @@
 	menu.Add(btn2)
 	menu.Add(btn3)
 
-	client := api.NewApiClient(cs_token, cs_appid, cs_appsecret)
+	client := wechat.NewApiClient(cs_token, cs_appid, cs_appsecret)
 	client.SetCache("redisx",`{"conn":":6379"}`)
 	client.CreateMenu(menu)
 
