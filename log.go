@@ -27,7 +27,7 @@ var BeeLogger *logs.BeeLogger
 // SetLogger sets a new logger.
 func SetLogger(adaptername string, config string) {
 	if BeeLogger == nil {
-		BeeLogger = logs.NewLogger(1)
+		BeeLogger = logs.NewLogger(0)
 	}
 	BeeLogger.SetLogger(adaptername, config)	
 }
