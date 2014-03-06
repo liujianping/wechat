@@ -123,6 +123,84 @@
 
 - subclass a custom callback from wechat.callback 
 - create a custome callback and set to the wechat app
+
+创建一个新的CallbackInteface类型并实现相关接口函数。
+
+````
+import "github.com/liujianping/wechat"
+import "github.com/liujianping/wechat/entry"
+
+type Echo struct{
+	Name string
+	wechat.Callback
+}
+func NewEcho(name string) *Echo{
+	return &Echo{name}
+}
+func (e *Echo) MsgText(txt *entry.TextRequest, back chan interface{}){
+	wechat.Info("Echo: MsgText ", txt)
+}
+func (e *Echo) MsgImage(img *entry.ImageRequest, back chan interface{}){
+	wechat.Info("Echo: MsgImage ", img)
+}
+func (e *Echo) MsgVoice(voice *entry.VoiceRequest, back chan interface{}){
+	wechat.Info("Echo: MsgVoice ", voice)
+}
+func (e *Echo) MsgVideo(video *entry.VideoRequest, back chan interface{}){
+	wechat.Info("Echo: MsgVideo ", video)
+}
+func (e *Echo) MsgLink(link *entry.LinkRequest, back chan interface{}){
+	wechat.Info("Echo: MsgLink ", link)
+}
+func (e *Echo) Location(location *entry.LocationRequest, back chan interface{}){
+	wechat.Info("Echo: Location ", location)
+}
+
+func (e *Echo) EventSubscribe(appoid string, oid string, back chan interface{}){
+	wechat.Info("Echo: EventSubscribe ", oid)
+	var subscriber entry.Subscriber
+	if err := e.Api.GetSubscriber(oid, &subscriber); err != nil {
+		wechat.Error("Echo: get subscriber failed ", err)
+	}
+
+	response := entry.NewTextResponse(appoid, oid, fmt.Sprintf("%s 欢迎您的关注!", subscriber.Nickname))
+
+	back <- response
+}
+func (e *Echo) EventUnsubscribe(appoid string, oid string, back chan interface{}){
+	wechat.Info("Echo: EventUnsubscribe ", oid)	
+
+}
+func (e *Echo) EventMenu(appoid string, oid string, key string, back chan interface{}){
+	wechat.Info("Echo: EventMenu ", oid, key)	
+}
+
+//! 设置
+app.SetCallback(NewEcho("demo"))
+
+````
+- create a handle and set to the wechat app
+
+创建一个Handle方法实现
+
+````
+func DemoHandle(data []byte, back chan []byte){
+	wechat.Info("recieve raw msg:\n", string(data))
+	//! TODO: anything you want to do
+	//! send empty string back
+	back <- []byte("")
+}
+
+//! 设置
+app.SetHandle(DemoHandle)
+
+
+````
 - run the wechat app
 
-具体用例参见 [wechatdemo](https://github.com/liujianping/wechatdemo)
+callback 和 handle 二者取一个即可。如果两者均设置了, 两个都会被调用。
+
+具体用例参见:
+- [wechatdemo](https://github.com/liujianping/wechatdemo)
+- [wechatdemo2](https://github.com/liujianping/wechatdemo2)
+
