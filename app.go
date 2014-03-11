@@ -27,7 +27,7 @@ type CallbackInterface interface {
 	EventMenu(appoid string, oid string, key string, back chan interface{})
 }
 
-type Handle func (data []byte, back chan []byte)
+type Handle func (app *WeChatApp, data []byte, back chan []byte)
 
 type WeChatApp struct{
 	AppHost 	string 
@@ -37,8 +37,8 @@ type WeChatApp struct{
 	AppId		string 
 	AppSecret 	string 
 	AppPath		string
+	Config 		config.ConfigContainer
 	menu	  	*entry.Menu
-	config 		config.ConfigContainer
 	cb 			CallbackInterface
 	handle 		Handle
 	api 	    *ApiClient
@@ -62,26 +62,26 @@ func NewWeChatApp() *WeChatApp {
 
 func (app *WeChatApp) SetConfig(adapter, file string) error {
 	var err error
-	app.config, err = config.NewConfig(adapter, file)
+	app.Config, err = config.NewConfig(adapter, file)
 	if err != nil {
 		return err
 	} else {
-		app.AppHost = app.config.String("AppHost")
+		app.AppHost = app.Config.String("AppHost")
 
-		if v, err := app.config.Int("AppPort"); err == nil {
+		if v, err := app.Config.Int("AppPort"); err == nil {
 			app.AppPort = v
 		}
 
-		if v := app.config.String("AppURI"); v != "" {
+		if v := app.Config.String("AppURI"); v != "" {
 			app.AppURI = v
 		}
-		if v := app.config.String("AppToken"); v != "" {
+		if v := app.Config.String("AppToken"); v != "" {
 			app.AppToken = v
 		}
-		if v := app.config.String("AppId"); v != "" {
+		if v := app.Config.String("AppId"); v != "" {
 			app.AppId = v
 		}
-		if v := app.config.String("AppSecret"); v != "" {
+		if v := app.Config.String("AppSecret"); v != "" {
 			app.AppSecret = v
 		}
 	}
@@ -196,7 +196,7 @@ func (app *WeChatApp) execute(wr http.ResponseWriter, req *http.Request) error {
 	}(timeout)
 
 	if app.handle != nil {
-		go app.handle(data, raw)
+		go app.handle(app, data, raw)
 	}
 
 	if app.cb != nil {
