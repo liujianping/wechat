@@ -46,7 +46,7 @@ func (app *Application) Api() *Client {
 }
 
 func (app *Application) signature(signature, timestamp, nonce string) bool {
-	strs := sort.StringSlice{app.secret, timestamp, nonce}
+	strs := sort.StringSlice{app.token, timestamp, nonce}
 	sort.Strings(strs)
 	str := ""
 
@@ -111,10 +111,10 @@ func (srv *Server) Start() {
 
 func (srv *Server) Get(c *iris.Context) {
 	if app, ok := srv.applications[c.PathString()]; ok {
-		signature := c.Param("signature")
-		timestamp := c.Param("timestamp")
-		nonce := c.Param("nonce")
-		echostr := c.Param("echostr")
+		signature := c.URLParam("signature")
+		timestamp := c.URLParam("timestamp")
+		nonce := c.URLParam("nonce")
+		echostr := c.URLParam("echostr")
 
 		if app.signature(signature, timestamp, nonce) == true {
 			c.Write(echostr)

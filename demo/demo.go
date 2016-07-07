@@ -8,7 +8,6 @@ import (
 )
 
 func DemoHandle(app *wechat.Application, request *entry.Request) (interface{}, error) {
-	log.Printf("app (%v)\n", app)
 	log.Printf("msg (%v)\n", request)
 	return nil, nil
 }
