@@ -2,13 +2,18 @@
 
 [![GoDoc](http://godoc.org/github.com/liujianping/wechat?status.png)](http://godoc.org/github.com/liujianping/wechat)
 
-该框架仅为抛砖之作, 没有实现太多的微信公众号全部的api接口。仅实现接口包括:
+该框架仅为抛砖之作, 没有实现的微信公众号的全部api接口, 仅实现部分接口包括:
 
 -	[获取接口调用凭据](http://mp.weixin.qq.com/wiki/2/88b2bf1265a707c031e51f26ca5e6512.html)
 -	[接收消息](http://mp.weixin.qq.com/wiki/17/fc9a27730e07b9126144d9c96eaf51f9.html)
 -	[发送消息](http://mp.weixin.qq.com/wiki/18/c66a9f0b5aa952346e46dc39de20f672.html)
 -	[自定义菜单](http://mp.weixin.qq.com/wiki/6/95cade7d98b6c1e1040cde5d9a2f9c26.html)
 -	[用户管理](http://mp.weixin.qq.com/wiki/17/c807ee0f10ce36226637cebf428a0f6d.html)
+
+### 项目依赖
+
+-	[api](http://github.com/liujianping/api)
+-	[iris](http://github.com/kataras/iris) 
 
 ###  快速开始
 
@@ -85,15 +90,15 @@
 		serv.Start()
 	}
 
-
 ````
 
 ### 例子
 
 参考 demo 实现.
 
+### 老版本
 
-[老版本.README](https://github.com/liujianping/wechat/blob/v0.1/README.md)
+[README](https://github.com/liujianping/wechat/blob/v0.1/README.md)
 
 
 
