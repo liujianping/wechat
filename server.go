@@ -68,6 +68,7 @@ type Server struct {
 	address      string
 	applications map[string]*Application
 	handles      map[string]Handle
+	debug        bool
 }
 
 func NewServer(address string) *Server {
@@ -84,9 +85,15 @@ func (srv *Server) Application(app *Application, handle Handle) *Server {
 	return srv
 }
 
+func (srv *Server) Debug(flag bool) *Server {
+	srv.debug = flag
+	return srv
+}
+
 func (srv *Server) Start() {
 	for uri, app := range srv.applications {
 		if app.menu != nil {
+			app.Api().Debug(srv.debug)
 			if err := app.Api().DeleteMenu(); err != nil {
 				log.Printf("wechat server started faild: %s\n", err.Error())
 				return
