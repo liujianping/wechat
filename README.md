@@ -94,7 +94,7 @@
 
 ### 例子
 
-参考 demo 实现.
+参考 [demo](https://github.com/liujianping/wechat/blob/master/demo/demo.go) 实现.
 
 ### 老版本
 
