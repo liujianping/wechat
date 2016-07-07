@@ -2,6 +2,26 @@ package entry
 
 import "encoding/xml"
 
+const (
+	MsgTypeEvent                   = "event"                     // 文本消息
+	MsgTypeText                    = "text"                      // 文本消息
+	MsgTypeImage                   = "image"                     // 图片消息
+	MsgTypeVoice                   = "voice"                     // 语音消息
+	MsgTypeVideo                   = "video"                     // 视频消息
+	MsgTypeMusic                   = "music"                     // 音乐消息
+	MsgTypeNews                    = "news"                      // 图文消息
+	MsgTypeTransferCustomerService = "transfer_customer_service" // 将消息转发到多客服
+)
+
+const (
+	EventSubscribe   = "subscribe"   // 订阅事件
+	EventUnSubscribe = "unsubscribe" // 取消订阅事件
+	EventScan        = "scan"        // 扫描
+	EventLocation    = "location"    // 定位
+	EventClick       = "click"       // 自定义菜单点击事件
+	EventView        = "view"        // 自定义菜单跳转事件
+)
+
 //! msg request referrence: http://mp.weixin.qq.com/wiki/17/fc9a27730e07b9126144d9c96eaf51f9.html
 //! evt request referrence: http://mp.weixin.qq.com/wiki/14/f79bdec63116f376113937e173652ba2.html
 type Request struct {
