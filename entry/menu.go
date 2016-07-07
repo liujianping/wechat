@@ -1,59 +1,48 @@
 package entry
 
-import (
-	"errors"
-)
-
-type Button struct{
-	Type string	`json:"type,omitempty"`
-	Name string `json:"name"`
-	Key  string `json:"key,omitempty"`
-	Url  string `json:"url,omitempty"`
-	Sub []*Button `json:"sub_button,omitempty"`
+type Button struct {
+	Type    string    `json:"type,omitempty"`
+	Name    string    `json:"name"`
+	Key     string    `json:"key,omitempty"`
+	Url     string    `json:"url,omitempty"`
+	Buttons []*Button `json:"sub_button,omitempty"`
 }
 
-func NewButton(name string) *Button{
-	return &Button{Name:name}
-}
-
-func NewViewButton(name, url string) *Button {
-	return &Button{Type:"view", Name:name, Url: url}
-}
-
-func NewClickButton(name string, key string) *Button{
-	return &Button{Type:"click", Name:name, Key: key}	
-}
-
-func (btn *Button) Append(subbtn *Button) error{
-	if len(btn.Sub) >= 5 {
-		return errors.New("button: exceed max 5 sub buttons")
+func NewButton(caption string) *Button {
+	return &Button{
+		Name: caption,
 	}
-	for _, b := range btn.Sub {
-		if b.Name == subbtn.Name {
-			return errors.New("button: sub button exist same name button")
-		}
-	}
-	btn.Type = ""
-	btn.Key = ""
-	btn.Url = ""
-	btn.Sub = append(btn.Sub, subbtn)
-	return nil
 }
 
-type Menu struct{
+func (b *Button) URL(url string) *Button {
+	b.Type = "view"
+	b.Url = url
+	return b
+}
+
+func (b *Button) Event(event string) *Button {
+	b.Type = "event"
+	b.Key = event
+	return b
+}
+
+func (b *Button) Append(btn *Button) *Button {
+	b.Buttons = append(b.Buttons, btn)
+	return b
+}
+
+type Menu struct {
 	Buttons []*Button `json:"button,omitempty"`
 }
 
-func NewMenu() *Menu{
-	return &Menu{}
-}
-
-func (menu *Menu) Add(btn *Button) error{
-	if len(menu.Buttons) >= 3 {
-		return errors.New("menu: can't add menu button more than 3.")
+func NewMenu(btns ...*Button) *Menu {
+	var buttons []*Button
+	for _, btn := range btns {
+		buttons = append(buttons, btn)
 	}
-
-	menu.Buttons = append(menu.Buttons, btn)
-	return nil
+	return &Menu{Buttons: buttons}
 }
 
+func (m *Menu) Append(btn *Button) {
+	m.Buttons = append(m.Buttons, btn)
+}

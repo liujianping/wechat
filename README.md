@@ -2,15 +2,123 @@
 
 [![GoDoc](http://godoc.org/github.com/liujianping/wechat?status.png)](http://godoc.org/github.com/liujianping/wechat)
 
-##  安装
+##  [老版本](https://github.com/liujianping/wechat/tree/v0.1)
+
+	[README](https://github.com/liujianping/wechat/blob/v0.1/README.md)
+
+##  快速开始
+
+客户端快速开发指南:
+
+````go
 	
-框架主要依赖包：
+	import "github.com/liujianping/wechat"
+	import "github.com/liujianping/wechat/entry"
 
-	go get github.com/astaxie/beego/logs
-	go get github.com/astaxie/beego/config
-	go get github.com/liujianping/wechat
+	api := wechat.NewClient("appid", "appsecret")
 
-##  使用
+	// 获取令牌
+	var token entry.Token
+	if err := api.Access(&token); err != nil {
+
+	}
+
+	// 获取用户信息
+	var user_info subscriber.UserInfo
+	if err := api.GetUserInfo("open_id", "zh_CN", &user_info); err != nil {
+
+	}
+
+	// 更多接口
+	...
+
+````
+
+服务端(支持多应用)快速开发指南:
+
+````go
+
+	import "github.com/liujianping/wechat"
+	import "github.com/liujianping/wechat/entry"	
+
+	//! 应用1
+	app1 := wechat.NewApplication("uri1", "token", "appid", "appsecret", handle1)
+	
+	btn11 := entry.NewButton("b1").URL("http://"))
+	btn12 := entry.NewButton("b2").Event("event_unique_id")
+	btn13 := entry.NewButton("b3").Append(entry.NewButton("c1").URL("http://")).Append(entry.NewButton("c2").Event(""))
+	app1.SetMenu(entry.NewMenu(btn11, btn12, btn13))
+
+	//! 应用2
+	app2 := wechat.NewApplication("uri2", "token", "appid", "appsecret", handle2)
+
+	btn21 := entry.NewButton("b1").URL("http://"))
+	btn22 := entry.NewButton("b2").Event("event_unique_id")
+	btn23 := entry.NewButton("b3").Append(entry.NewButton("c1").URL("http://")).Append(entry.NewButton("c2").Event(""))
+	app2.SetMenu(entry.NewMenu(btn21, btn22, btn23))
+
+	//! 服务
+	serv := wechat.NewServer("host:port")
+
+	serv.URIApplication(app1).URIApplication(app2)
+
+	serv.Start()
+
+	serv.Stop()
+
+````
+
+开发自己的微信公众号的服务功能, 只需要实现自己的 IReqeustHandle 接口即可。
+
+````go
+
+	import "github.com/liujianping/wechat"
+	import "github.com/liujianping/wechat/entry"
+
+	type Echo struct{
+	}
+
+	func (echo Echo) Text(text *entry.Text) {
+
+		wechat.RenderXML(wr, text)
+	}
+
+	func (echo Echo) Image(image *entry.Image) {
+		
+	}
+
+	func (echo Echo) Voice() {
+		
+	}
+
+	func (echo Echo) Video() {
+		
+	}
+
+	func (echo Echo) Link() {
+		
+	}
+
+	func (echo Echo) Location() {
+		
+	}
+
+	func (echo Echo) Subscribe() {
+		
+	}
+
+	func (echo Echo) UnSubscribe() {
+		
+	}
+
+	func (echo Echo) () {
+		
+	}
+
+
+````
+
+
 
 ### 1) you need import it
 
@@ -137,7 +245,7 @@ type Echo struct{
 func NewEcho(name string) *Echo{
 	return &Echo{name}
 }
-func (e *Echo) MsgText(txt *entry.TextRequest, back chan interface{}){
+func (e *Echo) MsgText(txt *entry.Textentry, back chan interface{}){
 	wechat.Info("Echo: MsgText ", txt)
 }
 func (e *Echo) MsgImage(img *entry.ImageRequest, back chan interface{}){
