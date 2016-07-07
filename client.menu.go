@@ -11,7 +11,7 @@ func (c *Client) CreateMenu(m *entry.Menu) error {
 		return err
 	}
 
-	agent := api.Post(conf.MakeURL("menu.create")).Debug(true)
+	agent := api.Post(conf.MakeURL("menu.create")).Debug(c.debug)
 	agent.QuerySet("access_token", c.token.Secret)
 	agent.JSONData(m)
 
@@ -31,7 +31,7 @@ func (c *Client) DeleteMenu() error {
 		return err
 	}
 
-	agent := api.Get(conf.MakeURL("menu.delete")).Debug(true)
+	agent := api.Get(conf.MakeURL("menu.delete")).Debug(c.debug)
 	agent.QuerySet("access_token", c.token.Secret)
 
 	var e entry.ApiError

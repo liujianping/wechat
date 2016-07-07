@@ -11,7 +11,7 @@ func (c *Client) GetUserInfo(opendid, lang string, user_info *entry.UserInfo) er
 		return err
 	}
 
-	agent := api.Post(conf.MakeURL("user.info"))
+	agent := api.Post(conf.MakeURL("user.info")).Debug(c.debug)
 	agent.QuerySet("access_token", c.token.Secret)
 
 	if _, _, err := agent.JSON(&user_info); err != nil {

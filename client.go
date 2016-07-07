@@ -12,6 +12,7 @@ type Client struct {
 	appid  string
 	secret string
 	token  *entry.Token
+	debug  bool
 }
 
 func NewClient(appid, secret string) *Client {
@@ -20,6 +21,11 @@ func NewClient(appid, secret string) *Client {
 		secret: secret,
 		token:  nil,
 	}
+}
+
+func (c *Client) Debug(flag bool) *Client {
+	c.debug = flag
+	return c
 }
 
 func (c *Client) Access(tk *entry.Token) error {
@@ -33,7 +39,7 @@ func (c *Client) Access(tk *entry.Token) error {
 		}
 	}
 
-	agent := api.Get(conf.MakeURL("access.token")).Debug(true)
+	agent := api.Get(conf.MakeURL("access.token")).Debug(c.debug)
 	agent.QuerySet("grant_type", "client_credential")
 	agent.QuerySet("appid", c.appid)
 	agent.QuerySet("secret", c.secret)
