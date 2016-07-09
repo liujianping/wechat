@@ -16,7 +16,7 @@ func (c *Client) GetUserInfo(opendid, lang string, user_info *entry.UserInfo) er
 	agent.QuerySet("openid", opendid)
 	agent.QuerySet("lang", lang)
 
-	if _, _, err := agent.JSON(&user_info); err != nil {
+	if _, _, err := agent.JSON(user_info); err != nil {
 		return err
 	}
 
