@@ -91,6 +91,9 @@
 	}
 
 ````
+### 微信测试号
+
+[申请](https://mp.weixin.qq.com/debug/cgi-bin/sandbox?t=sandbox/login)
 
 ### 例子
 
