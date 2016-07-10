@@ -33,12 +33,12 @@
 	}
 
 	// 获取用户信息
-	var user_info subscriber.UserInfo
+	var user_info entry.UserInfo
 	if err := api.GetUserInfo("open_id", "zh_CN", &user_info); err != nil {
 
 	}
 
-	// 更多接口
+	// 更多接口(参考其它微信项目的对象定义即可轻松实现)
 	...
 
 ````
@@ -57,28 +57,63 @@
 	)
 
 	func DemoHandle(app *wechat.Application, request *entry.Request) (interface{}, error) {
-		log.Printf("demo app (%v)\n", app)
 		log.Printf("demo msg (%v)\n", request)
 		return nil, nil
 	}
 
 	func EchoHandle(app *wechat.Application, request *entry.Request) (interface{}, error) {
-		log.Printf("echo app (%v)\n", app)
-		log.Printf("echo msg (%v)\n", request)
+		switch strings.ToLower(request.MsgType) {
+		case entry.MsgTypeEvent:
+			switch strings.ToLower(request.Event) {
+			case entry.EventSubscribe:
+				log.Printf("user (%s) subscribed", request.FromUserName)
+
+				var user_info entry.UserInfo
+				if err := app.Api().GetUserInfo(request.FromUserName, entry.LangZhCN, &user_info); err != nil {
+					return nil, err
+				}
+
+				text := entry.NewText(request.FromUserName,
+					request.ToUserName,
+					time.Now().Unix(),
+					fmt.Sprintf("亲爱的(%s), 谢谢您的关注!", user_info.NickName))
+				return text, nil
+
+			case entry.EventUnSubscribe:
+				log.Printf("user (%s) unsubscribed", request.FromUserName)
+			case entry.EventScan:
+				log.Printf("user (%s) scan", request.FromUserName)
+			case entry.EventLocation:
+				log.Printf("user (%s) location", request.FromUserName)
+			case entry.EventClick:
+				log.Printf("user (%s) menu click (%s)", request.FromUserName, request.EventKey)
+			case entry.EventView:
+				log.Printf("user (%s) menu view (%s)", request.FromUserName, request.EventKey)
+			}
+		case entry.MsgTypeText:
+			//! echo
+			text := entry.NewText(request.FromUserName, request.ToUserName, time.Now().Unix(), request.TextContent)
+			return text, nil
+		case entry.MsgTypeImage:
+		case entry.MsgTypeVoice:
+		case entry.MsgTypeVideo:
+		case entry.MsgTypeMusic:
+		case entry.MsgTypeNews:
+		}
 		return nil, nil
 	}
 
 	func main() {
 		demo := wechat.NewApplication("/demo", "demo_secret", "appid", "secret", false)
 
-		btn11 := entry.NewButton("baidu").URL("http://baidu.com")
+		btn11 := entry.NewButton("link").URL("http://github.com/liujianping/wechat")
 		btn12 := entry.NewButton("click").Event("event_click")
 		demo.Menu(entry.NewMenu(btn11, btn12))
 
 
 		echo := wechat.NewApplication("/echo", "echo_secret", "appid", "secret", false)
 
-		btn21 := entry.NewButton("baidu").URL("http://baidu.com")
+		btn21 := entry.NewButton("link").URL("http://github.com/liujianping/wechat")
 		btn22 := entry.NewButton("click").Event("event_click")
 		echo.Menu(entry.NewMenu(btn21, btn22))
 
