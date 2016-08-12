@@ -13,7 +13,7 @@ func (c *Client) CreateMenu(m *entry.Menu) error {
 
 	agent := api.Post(conf.MakeURL("menu.create")).Debug(c.debug)
 	agent.QuerySet("access_token", c.token.Secret)
-	agent.JSONData(m)
+	agent.JSONData(m, true)
 
 	var e entry.ApiError
 	if _, _, err := agent.JSON(&e); err != nil {
